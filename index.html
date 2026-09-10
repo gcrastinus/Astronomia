@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Astronomia — the liberal art</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230c1220' width='32' height='32' rx='6'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23d4a04a' stroke-width='1.2'/%3E%3Ccircle cx='16' cy='6' r='1.4' fill='%23e8e0d0'/%3E%3Ccircle cx='24' cy='16' r='1.1' fill='%23e8e0d0'/%3E%3Ccircle cx='10' cy='22' r='.9' fill='%23e8e0d0'/%3E%3Cpath d='M6 16 A10 10 0 0 1 26 16' fill='none' stroke='%23e08a55' stroke-width='1'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <button type="button" class="tbtn icon" id="b-nav" title="Contents" aria-label="Open contents" aria-expanded="false" aria-controls="side-nav">☰</button>
+    <h1>Astronomia <small>the liberal art of the moving heavens</small></h1>
+    <label class="guide" title="Guided practice: spaced returns of the palaestra">
+      <span class="guide-lab">Guided</span>
+      <input type="checkbox" id="b-guide" role="switch" aria-label="Guided practice">
+      <span class="guide-track" aria-hidden="true"><span class="guide-knob"></span></span>
+    </label>
+    <span class="progress" id="progress" title="Exercise blocks possessed" hidden>0/8</span>
+    <button type="button" class="tbtn" id="b-lab" title="Open the sky">Sky</button>
+    <button type="button" class="tbtn" id="b-jour" title="Open the field journal">Journal</button>
+    <button type="button" class="tbtn icon" id="b-speak" title="Read this page (r)" aria-label="Read this page" aria-pressed="false">🔊</button>
+    <button type="button" class="tbtn icon" id="b-theme" title="Light / dark (d)">☀</button>
+  </header>
+  <button type="button" class="nav-backdrop" id="nav-backdrop" aria-label="Close contents" tabindex="-1"></button>
+  <nav id="side-nav" aria-label="Contents">
+    <div class="find"><input id="find" placeholder="Search  ( / )" autocomplete="off"></div>
+    <div id="nav-list"></div>
+    <p class="colophon">A first-principles course from the sky. After Ptolemy, Sacrobosco, Copernicus, and Kepler; geometry applied to the moving heavens. Eight exercise blocks. Then the door into mathematical physics, what was settled after, and what the art is for.<br><a class="si-home" href="https://studiuminstitute.org">Studium Institute</a></p>
+  </nav>
+  <main id="main">
+    <article class="wrap">
+      <p class="kicker">Loading</p>
+      <h2 class="lesson">Astronomia</h2>
+      <p>If this message stays, the scripts did not load. Open <code>index.html</code> from this folder (not a Dropbox website preview), keep the <code>js</code> and <code>css</code> folders beside it, and allow JavaScript.</p>
+    </article>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script src="js/astro.js"></script>
+<script src="js/geom.js"></script>
+<script src="js/figures-iii.js"></script>
+<script src="js/content.js"></script>
+<script src="js/content2.js"></script>
+<script src="js/content3.js"></script>
+<script src="js/contemplate.js"></script>
+<script src="js/drills.js"></script>
+<script src="js/widgets.js"></script>
+<script src="js/chapter-iii.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
