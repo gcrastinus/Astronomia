@@ -127,7 +127,7 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
   html: `
 <p>The art rests on this: the heavens repeat, so a construction can be tested (<span class="xref" data-to="i-1b"></span>). A figure that saves this year’s solstice must save next year’s, or it is false. That is why astronomy, and not the study of falling leaves, is a quadrivial art.</p>
 <p>The claim was never that nothing changes. It was that change is rare, slow, and itself measurable by the same art. Every exception in this chapter was caught with a quadrant, a cross-staff, or an unaided eye. None of them required a telescope. They are how the bound of the claim was found.</p>
-<p>What follows is three such measurements: a new star and a comet, which Tycho placed by parallax; a star that winks, which you can time from a chair; and a slow drift of the catalogue, which only centuries reveal. The wanderers of the next chapter are a different kind of change: they wander, but on closed constructions. All of them are changes <em>in the sphere of the stars itself</em>, or in what was held to belong to it.</p>
+<p>What follows: the new star and the comet, which Tycho placed by parallax; a star that winks, which you can time from a chair; and a slow drift of the catalogue, which only centuries reveal. The wanderers of the next chapter are a different kind of change. They wander, but on closed constructions. The changes in this chapter are in the sphere of the stars itself, or in what had been held to belong to it.</p>
 `,
   sources: "Ptolemy, Almagest I.1; the bound is the course’s own, from i-1b."
 },
@@ -324,7 +324,7 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
   <span>Earth at rest. Sun about the earth; planets about the sun. All Copernican relative geometry, without a moving earth. Cost: the sun’s orbit intersects Mars’s (the spheres cannot be solid); still no parallax; a physics in which the sun hauls the planets around a resting earth.</span>
 </div>
 <div class="widget" data-kind="worlds"></div>
-<p>The widget runs the same elongation three ways. Preference, if it is to be more than taste, needs a reason that is not the appearances of longitude alone — because those, Tycho and Copernicus share.</p>
+<p>The widget runs the same elongation three ways, and prints it once. Preference, if it is to be more than taste, needs a reason that is not the appearances of longitude alone — because those, Tycho and Copernicus share. Run the year and watch a retrograde arrive in all three together.</p>
 `,
   sources: "Copernicus, De revolutionibus I.9–11; Tycho, as above; Ptolemy, Almagest IX."
 },

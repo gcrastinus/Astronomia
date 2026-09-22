@@ -125,7 +125,7 @@ AstroArs.LESSONS = [
   <dd>The turning-circle: the northernmost and southernmost paths the sun takes in the year.</dd>
 </dl>
 <div class="widget" data-kind="gnomon"></div>
-<p>A vertical stick — a gnomon — makes the same fact by day. The noon shadow is longest at the winter turning, shortest at the summer. The ratio of shadow to stick, at noon on an equinox, is the tangent of your latitude. The measurement is waiting in <span class="xref" data-to="ii-6"></span>.</p>
+<p>A vertical stick — a gnomon — makes the same fact by day. The noon shadow is longest at the winter turning, shortest at the summer. The ratio of shadow to stick, at noon on an equinox, is the tangent of your latitude. The equinox-noon button sets the figure to that day. The measurement is waiting in <span class="xref" data-to="ii-6"></span>.</p>
 <div class="widget" data-kind="journal" data-tasks="sunset,daylength,gnomon"></div>
 `,
   sources: "Geminos, Introduction 1, 5–7; Sacrobosco, De sphaera 3; Ptolemy, Almagest I.10."
@@ -196,7 +196,7 @@ AstroArs.LESSONS = [
 <p>A construction becomes a science of its matter only where the matter holds still enough to be caught. A figure that saves this year’s solstice must save next year’s, or it is refuted. The sun returns to the same solstice; the same stars rise at the same points of the horizon; the moon returns to the same phase in the same count of days. A falling leaf does not. A river floods in season, which is regular enough to expect and not regular enough to compute. Terrestrial motions are irregular, or regular only loosely and for the most part. The heavens repeat. That repetition is what lets a figure be tested rather than merely drawn, and it is why astronomy — not mechanics, not meteorology — sits where it does in the quadrivium.</p>
 <p>The regularity is not absolute. The heavens do change; the changes are few, slow, and themselves measurable. <span class="xref" data-ch="chg"></span> will treat them. For the most part, and for a lifetime of watching, the same motions return.</p>
 <p>Nor is the certainty metaphysical. It reaches as far as the senses and ordinary instruments reach: a gnomon, an armillary, a quadrant, a pair of binoculars. What lies past them is another question. The course will name that threshold when it comes to it.</p>
-<p>Because this is the most certain matter among things we see, a small discrepancy is information, not noise. Chapter VII will turn on eight minutes of arc. Kepler refuses them. Anyone who has not held that the heavens are regular enough to be measured that finely will not see why he refused, and will take the eight minutes for a wobble in the instrument or a looseness in the sky.</p>
+<p>Because this is the most certain matter among things we see, a small discrepancy is information, not noise. <span class="xref" data-ch="VII"></span> will turn on eight minutes of arc. Kepler refuses them. Anyone who has not held that the heavens are regular enough to be measured that finely will not see why he refused, and will take the eight minutes for a wobble in the instrument or a looseness in the sky.</p>
 <div class="widget" data-kind="check"
   data-ask="The heavens are the matter of this art because"
   data-opts="They are the noblest bodies|They are regular enough for a construction to be tested against them|They are far away, and so not mixed with earthly change|They do not change at all"
@@ -471,8 +471,8 @@ AstroArs.LESSONS = [
   html: `
 <p>To compute on a sphere you must know, from an arc, the straight line that subtends it. Ptolemy’s instrument for this is the <strong>chord</strong>.</p>
 <p>He takes a circle of diameter 120 — so that the radius is 60, a convenient sexagesimal. The chord of an arc is the length of the straight line joining its ends, in those units. In modern language: crd θ = 120 sin(θ/2). You will not need that formula if you build the table as he did.</p>
-<p><strong>Known chords from Euclid.</strong> The hexagon: crd 60° = 60 (the radius). The square: crd 90° = 60√2. The equilateral triangle: crd 120° = 60√3. The pentagon: crd 72° from Elements XIII. The half of 72° is 36°.</p>
-<p><strong>Ptolemy’s theorem</strong> (Almagest I.10): in a cyclic quadrilateral, the product of the diagonals equals the sum of the products of the opposite sides. The demonstration is the figure below. This is the theorem that yields the chord of a difference. With <em>AD</em> a diameter, the same quadrilateral gives crd(α − β) from crd α, crd β and the diameter 120: crd(α − β) = (crd α · crd(180° − β) − crd β · crd(180° − α)) / 120. Halving then gives crd 12°, crd 6°, crd 3°, crd 1½°. crd 1° cannot be constructed; it is bounded and interpolated.</p>
+<p><strong>Known chords from Euclid.</strong> The hexagon: crd 60° = 60 (the radius). The square: crd 90° = 60√2. The equilateral triangle: crd 120° = 60√3. The decagon: crd 36°. The pentagon: crd 72°. Both of those are Elements XIII.</p>
+<p><strong>Ptolemy’s theorem</strong> (Almagest I.10): in a cyclic quadrilateral, the product of the diagonals equals the sum of the products of the opposite sides. The demonstration is the figure below. This is the theorem that yields the chord of a difference. With <em>AD</em> a diameter, the same quadrilateral gives crd(α − β) from crd α, crd β and the diameter 120: crd(α − β) = (crd α · crd(180° − β) − crd β · crd(180° − α)) / 120. The difference of 72° and 60° is crd 12°. Halving then gives crd 6°, crd 3°, crd 1½°, and crd ¾°. crd 1° cannot be constructed; it is bounded and interpolated.</p>
 <div class="widget" data-kind="proof" data-fig="ptolemy"></div>
 <div class="widget" data-kind="proof" data-fig="crddiff"></div>
 <div class="widget" data-kind="proof" data-fig="crdhalf"></div>
@@ -496,6 +496,7 @@ AstroArs.LESSONS = [
 <p>The modern value is about 23;26°. The difference is real: the obliquity changes slowly. For the art as Ptolemy practised it, 23;51,20° is the number. For checking the sky widget against your noon shadow, use the present value. The demonstration does not care which, once the number is measured.</p>
 <p>From the obliquity, by spherical triangles, one computes: the declination of the sun from its longitude; the length of daylight at a given latitude; the rising-times of the signs. The rule that does it is Menelaos.</p>
 <div class="widget" data-kind="gnomon"></div>
+<p>The summer-noon and winter-noon buttons set the two turnings. Read the two noon altitudes. Their difference is twice the obliquity: the measurement this lesson is about. At an equinox noon the same figure gives your latitude, as the tangent of the shadow-ratio.</p>
 `,
   sources: "Ptolemy, Almagest I.12, I.14–16."
 },
@@ -512,7 +513,7 @@ AstroArs.LESSONS = [
 <p><strong>Menelaos, spherical.</strong> The same figure, drawn in great circles on a sphere. The “segments” are now arcs, and the ratios are chords of twice those arcs: crd(2 AD)/crd(2 DB) · crd(2 BE)/crd(2 EC) · crd(2 CF)/crd(2 FA) = 1. That is the rule by which Ptolemy moves from a known arc to an unknown one, on the sphere of the heavens.</p>
 <div class="widget" data-kind="proof" data-fig="menelaos-sphere"></div>
 <p class="qed">Q.E.D. — Menelaos, spherical</p>
-<p>Van Brummelen’s remark, which is the right spirit: this is not a formula to survive. It is a historical art with its own beauty. The Islamic astronomers reworked it into the rule of four quantities and the spherical law of sines. You may use the sine law if you have it; you should see once that Ptolemy did not need it.</p>
+<p>You need not carry the product as a formula. You need to have seen that a transversal of great circles yields an unknown arc from known ones, and that Ptolemy did it with chords. Later astronomers reworked the same figure into the rule of four quantities and the spherical law of sines. You may use the sine law if you have it.</p>
 <div class="remark">
   <h4>What you actually need</h4>
   <p>Given the sun’s longitude, find its declination: a right spherical triangle with the obliquity as one side. Given latitude and declination, find the length of day: another. The widget is the figure; the table of chords is the arithmetic. Together they are the instrument of <span class="xref" data-ch="IV"></span>.</p>

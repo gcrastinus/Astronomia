@@ -135,7 +135,7 @@ A.mountWidgets = function mountWidgets(root) {
       menelaos: A.mountMenelaosSphere || mountMenelaos, worlds: mountWorlds, journal: mountJournal,
       drill: mountDrill, check: mountCheck, phases: mountPhases,
       precess: mountPrecess, moontest: mountMoonTest, parallax: mountParallax,
-      proof: A.mountProof, varstar: mountVarstar
+      proof: A.mountProof, varstar: mountVarstar, harmony: mountHarmony
     };
     if (map[kind]) map[kind](el);
   });
@@ -619,60 +619,129 @@ function mountSphere(el) {
 
 /* ---- Gnomon -------------------------------------------------------- */
 function mountGnomon(el) {
-  const readout = head(el, "The gnomon", "");
+  const readout = head(el, "The gnomon", "plan of the shadow, and the altitude triangle");
   const fig = canvasEl(el, 640, 360, "fig");
   const { ctx, w, h } = fig;
-  const latS = sliderRow(el, "Latitude", 0, 60, 0.5, 30, v => ast.fmtDeg(v, "N", "S"));
-  const dayS = sliderRow(el, "Day of year", 1, 365, 1, 172, v => {
+  const lat0 = (A.lat && A.lat() > -60 && A.lat() < 70) ? A.lat() : 40;
+  const latS = sliderRow(el, "Latitude", -60, 70, 0.5, lat0, v => ast.fmtDeg(v, "N", "S"));
+  const dayS = sliderRow(el, "Day of year", 1, 365, 1, 81, v => {
     const d = new Date(2026, 0, v);
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   });
   const hourS = sliderRow(el, "Hour from noon", -8, 8, 0.05, 0, v => (v >= 0 ? "+" : "") + v.toFixed(2) + " h");
+  const row = document.createElement("div");
+  row.className = "playrow";
+  [["Equinox noon", 81], ["Summer noon", 173], ["Winter noon", 355]].forEach(([lab, day]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pbtn";
+    b.textContent = lab;
+    b.addEventListener("click", () => { dayS.set(day); hourS.set(0); draw(); });
+    row.appendChild(b);
+  });
+  el.appendChild(row);
+  const cap = document.createElement("p");
+  cap.className = "figcap";
+  el.appendChild(cap);
   latS.on(draw); dayS.on(draw); hourS.on(draw);
 
   function decl(doy) {
-    /* solar declination approx */
     return -23.44 * ast.cosd(360 / 365 * (doy + 10));
+  }
+  function noonAlt(lat, dec) {
+    return ast.asind(ast.sind(lat) * ast.sind(dec) + ast.cosd(lat) * ast.cosd(dec));
   }
   function draw() {
     const lat = latS.get(), doy = dayS.get(), hour = hourS.get();
     const dec = decl(doy);
     const ha = hour * 15;
     const alt = ast.asind(ast.sind(lat) * ast.sind(dec) + ast.cosd(lat) * ast.cosd(dec) * ast.cosd(ha));
-    const az = ast.atan2d(-ast.cosd(dec) * ast.sind(ha), ast.cosd(lat) * ast.sind(dec) - ast.sind(lat) * ast.cosd(dec) * ast.cosd(ha));
+    const az = ast.atan2d(
+      -ast.cosd(dec) * ast.sind(ha),
+      ast.cosd(lat) * ast.sind(dec) - ast.sind(lat) * ast.cosd(dec) * ast.cosd(ha)
+    );
     ctx.fillStyle = panel2(); ctx.fillRect(0, 0, w, h);
-    const groundY = h * 0.72;
-    ctx.fillStyle = css("--rule", "#2a364c");
-    ctx.fillRect(0, groundY, w, h - groundY);
-    const gx = w * 0.38, stick = 90;
-    ctx.strokeStyle = gold();
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(gx, groundY); ctx.lineTo(gx, groundY - stick); ctx.stroke();
+    /* plan: north up. The stick is a point; the shadow lies opposite the sun. */
+    const pcx = 200, pcy = 188;
+    ctx.strokeStyle = rule(); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(pcx, pcy, 118, 0, ast.TAU); ctx.stroke();
+    ctx.fillStyle = muted();
+    ctx.font = "12px ui-sans-serif, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("N", pcx, pcy - 124);
+    ctx.fillText("S", pcx, pcy + 132);
+    ctx.fillText("E", pcx + 128, pcy + 4);
+    ctx.fillText("W", pcx - 128, pcy + 4);
     ctx.fillStyle = gold();
-    ctx.beginPath(); ctx.arc(gx, groundY - stick, 4, 0, ast.TAU); ctx.fill();
-    if (alt > 0) {
-      const len = stick / Math.tan(ast.rad(alt));
-      const dir = ast.rad(az);
-      /* shadow on ground, south-up in the drawing would be confusing; draw along +x for west of south */
-      const sx = gx + Math.sin(dir) * Math.min(len, 280);
-      const sy = groundY + Math.cos(dir) * Math.min(len, 40) * 0.15;
+    ctx.beginPath(); ctx.arc(pcx, pcy, 4, 0, ast.TAU); ctx.fill();
+    ctx.fillStyle = muted();
+    ctx.font = "11px ui-sans-serif, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("gnomon", pcx + 8, pcy + 4);
+    let ratio = null, clipped = false;
+    if (alt > 0.4) {
+      ratio = 1 / Math.tan(ast.rad(alt));
+      const shAz = (az + 180) % 360;
+      const full = Math.min(ratio * 70, 108);
+      clipped = ratio * 70 > 108;
+      const sx = pcx + full * ast.sind(shAz);
+      const sy = pcy - full * ast.cosd(shAz);
       ctx.strokeStyle = muted();
-      ctx.lineWidth = 8; ctx.lineCap = "round";
-      ctx.globalAlpha = 0.35;
-      ctx.beginPath(); ctx.moveTo(gx, groundY); ctx.lineTo(sx, groundY); ctx.stroke();
-      ctx.globalAlpha = 1;
-      ctx.lineWidth = 1.5; ctx.lineCap = "butt";
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = ember();
-      ctx.beginPath(); ctx.moveTo(gx, groundY - stick); ctx.lineTo(sx, groundY); ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.lineWidth = 8; ctx.lineCap = "round"; ctx.globalAlpha = 0.45;
+      ctx.beginPath(); ctx.moveTo(pcx, pcy); ctx.lineTo(sx, sy); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.lineCap = "butt";
+      const sunLen = 36;
+      ctx.fillStyle = "#ffe9a0";
+      ctx.beginPath();
+      ctx.arc(pcx + sunLen * ast.sind(az), pcy - sunLen * ast.cosd(az), 5, 0, ast.TAU);
+      ctx.fill();
     }
-    /* noon shadow length at this day (ha=0) */
-    const noonAlt = ast.asind(ast.sind(lat) * ast.sind(dec) + ast.cosd(lat) * ast.cosd(dec));
-    const noonLen = noonAlt > 0 ? 1 / Math.tan(ast.rad(noonAlt)) : Infinity;
-    readout.textContent = alt > 0
-      ? `sun altitude ${alt.toFixed(1)}° · noon shadow / gnomon = ${noonLen.toFixed(3)} · declination ${dec.toFixed(1)}°`
-      : "the sun is below the horizon";
+    /* altitude triangle, true shadow length, not the plan */
+    const gx = 430, gy = 268, S = 120;
+    ctx.strokeStyle = rule(); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(390, gy); ctx.lineTo(620, gy); ctx.stroke();
+    ctx.strokeStyle = gold(); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx, gy - S); ctx.stroke();
+    ctx.fillStyle = muted();
+    ctx.font = "11px ui-sans-serif, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText("stick", gx - 8, gy - S / 2);
+    if (alt > 0.4 && ratio != null) {
+      const drawLen = Math.min(ratio * S, 170);
+      const tip = gx + drawLen;
+      ctx.strokeStyle = muted(); ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.globalAlpha = 0.4;
+      ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(tip, gy); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.lineCap = "butt"; ctx.lineWidth = 1.3;
+      ctx.setLineDash([4, 3]); ctx.strokeStyle = ember();
+      ctx.beginPath(); ctx.moveTo(gx, gy - S); ctx.lineTo(tip, gy); ctx.stroke();
+      ctx.setLineDash([]);
+      const arcR = 28;
+      ctx.strokeStyle = gold(); ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(tip, gy, arcR, Math.PI, Math.PI + ast.rad(Math.min(alt, 80)), false);
+      ctx.stroke();
+      ctx.fillStyle = gold();
+      ctx.textAlign = "left";
+      ctx.fillText(alt.toFixed(0) + "°", tip - arcR - 8, gy - 8);
+      ctx.fillStyle = muted();
+      ctx.fillText("shadow", gx + drawLen / 2, gy + 16);
+    } else {
+      ctx.fillStyle = muted();
+      ctx.textAlign = "left";
+      ctx.fillText("sun below the horizon", gx - 20, gy - S - 16);
+    }
+    const sumA = noonAlt(lat, 23.44), winA = noonAlt(lat, -23.44);
+    const parts = [];
+    if (alt > 0.4 && ratio != null) {
+      parts.push(`altitude ${alt.toFixed(1)}°`);
+      parts.push(`shadow/stick = ${ratio.toFixed(3)}` + (clipped ? " (plan clipped)" : ""));
+    } else parts.push("the sun is below the horizon");
+    parts.push(`declination ${dec.toFixed(1)}°`);
+    readout.textContent = parts.join(" · ");
+    const equinoxNoon = Math.abs(dec) < 0.4 && Math.abs(hour) < 0.15 && alt > 0;
+    cap.textContent = equinoxNoon
+      ? `Equinox noon: shadow/stick = tan(latitude) = tan ${Math.abs(lat).toFixed(1)}°. Summer noon altitude ${sumA.toFixed(1)}° minus winter ${winA.toFixed(1)}° is ${(sumA - winA).toFixed(1)}°, twice the obliquity.`
+      : `Summer noon altitude ${sumA.toFixed(1)}° minus winter noon altitude ${winA.toFixed(1)}° is ${(sumA - winA).toFixed(1)}°, twice the obliquity. At an equinox noon the shadow/stick is the tangent of your latitude.`;
   }
   draw();
 }
@@ -739,7 +808,11 @@ function mountModel(el) {
     }
   }
 
-  let trail = [], trailLon = [], playing = false, timer = 0, fitIndex = 0, hasRun = false;
+  let trail = [], trailLon = [], stations = [], prevLon = null, prevSign = 0;
+  let playing = false, timer = 0, fitIndex = 0, hasRun = false;
+  function resetPath() {
+    trail = []; trailLon = []; stations = []; prevLon = null; prevSign = 0;
+  }
 
   function meanLonAt(jd, name) {
     const p = ast.PLANETS[name];
@@ -798,11 +871,11 @@ function mountModel(el) {
   el.appendChild(play);
   play.addEventListener("click", e => {
     const m = e.target.dataset.m;
-    if (m === "clear") { trail = []; trailLon = []; draw(); }
+    if (m === "clear") { resetPath(); draw(); }
     if (m === "reveal" && fitting && hasRun) {
       const pv = PTOLEMY[fitPlanet];
       epiS.set(pv.epi); eccS.set(pv.e); eqS.set(pv.q); apoS.set(pv.apo);
-      trail = [];
+      resetPath();
       draw();
       A.toast && A.toast(pv.label);
     }
@@ -823,7 +896,7 @@ function mountModel(el) {
       }
     }
   });
-  const onShape = () => { trail = []; trailLon = []; hasRun = true; const b = play.querySelector("[data-m=reveal]"); if (b) b.disabled = false; draw(); };
+  const onShape = () => { resetPath(); hasRun = true; const b = play.querySelector("[data-m=reveal]"); if (b) b.disabled = false; draw(); };
   [epiS, eccS, eqS, apoS, meanS, anomS].forEach(s => s.on(onShape));
 
   function draw() {
@@ -891,7 +964,19 @@ function mountModel(el) {
       ctx.beginPath(); ctx.arc(cx + p.Cx, cy - p.Cy, p.r, 0, ast.TAU);
       ctx.strokeStyle = eclCol(); ctx.stroke();
     }
-    /* trail */
+    /* trail, and a station wherever the longitude turns */
+    let motion = "";
+    if (prevLon != null) {
+      const dLon = ast.wrap180(p.lon - prevLon);
+      const sign = dLon > 0.12 ? 1 : dLon < -0.12 ? -1 : 0;
+      if (sign && prevSign && sign !== prevSign) {
+        stations.push({ x: p.Px, y: p.Py });
+        if (stations.length > 6) stations.shift();
+      }
+      if (sign) prevSign = sign;
+      motion = sign > 0 ? "direct" : sign < 0 ? "retrograde" : "standing";
+    }
+    prevLon = p.lon;
     trail.push([p.Px, p.Py]);
     trailLon.push(p.lon);
     if (trail.length > 360) { trail.shift(); trailLon.shift(); }
@@ -903,6 +988,17 @@ function mountModel(el) {
       });
       ctx.strokeStyle = gold(); ctx.globalAlpha = 0.55; ctx.lineWidth = 1.4; ctx.stroke();
       ctx.globalAlpha = 1;
+    }
+    stations.forEach(s => {
+      ctx.beginPath(); ctx.arc(cx + s.x, cy - s.y, 7, 0, ast.TAU);
+      ctx.strokeStyle = ember(); ctx.lineWidth = 1.4; ctx.stroke();
+    });
+    if (stations.length) {
+      const s = stations[stations.length - 1];
+      ctx.fillStyle = ember();
+      ctx.font = "11px ui-sans-serif, sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("station", cx + s.x + 9, cy - s.y - 6);
     }
     /* planet */
     ctx.fillStyle = gold();
@@ -929,11 +1025,11 @@ function mountModel(el) {
           + " · deferent tied to the sun, as Ptolemy has it for the inner planets";
       }
       drawFit(res);
-      readout.textContent = `true longitude ${p.lon.toFixed(1)}° · day ${series[fitIndex].day}`;
+      readout.textContent = `true longitude ${p.lon.toFixed(1)}° · day ${series[fitIndex].day}` + (motion ? " · " + motion : "");
     } else {
       const mean = p.mean;
       const eq = ast.wrap180(p.lon - mean);
-      readout.textContent = `true longitude ${p.lon.toFixed(1)}° · mean ${mean.toFixed(1)}° · equation ${eq >= 0 ? "+" : ""}${eq.toFixed(1)}°`;
+      readout.textContent = `true longitude ${p.lon.toFixed(1)}° · mean ${mean.toFixed(1)}° · equation ${eq >= 0 ? "+" : ""}${eq.toFixed(1)}°` + (motion ? " · " + motion : "");
     }
   }
 
@@ -980,82 +1076,187 @@ function mountModel(el) {
 }
 
 /* ---- Ellipse / Kepler ---------------------------------------------- */
+function nuFromM(Mdeg, e0) {
+  const E = ast.kepler(Mdeg, e0);
+  let nu = ast.atan2d(Math.sqrt(1 - e0 * e0) * Math.sin(E), Math.cos(E) - e0);
+  if (nu < 0) nu += 360;
+  return nu;
+}
+function MFromNu(nuDeg, e0) {
+  const nu = ast.rad(((nuDeg % 360) + 360) % 360);
+  const E = 2 * Math.atan2(
+    Math.sqrt(1 - e0) * Math.sin(nu / 2),
+    Math.sqrt(1 + e0) * Math.cos(nu / 2)
+  );
+  let M = ast.deg(E - e0 * Math.sin(E));
+  if (M < 0) M += 360;
+  return M;
+}
 function mountEllipse(el) {
-  const readout = head(el, el.dataset.title || "The ellipse", "two foci, string taut");
+  const readout = head(el, el.dataset.title || "The ellipse", "circle, string, equal areas");
   const fig = canvasEl(el, 640, 400, "fig");
   const { ctx, w, h } = fig;
   const startE = el.dataset.e != null ? +el.dataset.e : 0.25;
   const startNu = el.dataset.nu != null ? +el.dataset.nu : 35;
   const eS = sliderRow(el, "Eccentricity", 0, 0.7, 0.005, startE, v => v.toFixed(3));
   const nuS = sliderRow(el, "True anomaly", 0, 360, 0.5, startNu, v => v.toFixed(1) + "°");
-  let playing = false, timer = 0, swept = [];
-  eS.on(() => { swept = []; draw(); });
-  nuS.on(draw);
+  const cap = document.createElement("p");
+  cap.className = "figcap";
+  let playing = false, timer = 0, meanDeg = MFromNu(startNu, startE);
+  let wedgeStart = meanDeg, wedges = [];
+  const WEDGE = 40;
+
+  function stop() {
+    playing = false;
+    clearInterval(timer);
+    const b = el.querySelector("[data-m=run]");
+    if (b) b.classList.remove("on");
+  }
+  function sector(e0, m0, m1) {
+    let dM = m1 - m0;
+    if (dM <= 0) dM += 360;
+    const n = 24, nus = [], pts = [];
+    for (let i = 0; i <= n; i++) {
+      const M = (m0 + dM * i / n) % 360;
+      const nu = nuFromM(M, e0);
+      nus.push(nu);
+      const r = (1 - e0 * e0) / (1 + e0 * Math.cos(nu * Math.PI / 180));
+      /* ν = 0 at perihelion, which lies to the left of the sun (the left focus). */
+      pts.push([-r * Math.cos(nu * Math.PI / 180), r * Math.sin(nu * Math.PI / 180)]);
+    }
+    let area = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      area += pts[i][0] * pts[i + 1][1] - pts[i + 1][0] * pts[i][1];
+    }
+    let arc = 0;
+    for (let i = 1; i < nus.length; i++) {
+      let d = nus[i] - nus[i - 1];
+      if (d > 180) d -= 360;
+      if (d < -180) d += 360;
+      arc += d;
+    }
+    return { area: Math.abs(area) / 2, arc: Math.abs(arc), pts };
+  }
+  function advanceMean() {
+    const e0 = eS.get();
+    meanDeg = (meanDeg + 2) % 360;
+    let travelled = meanDeg - wedgeStart;
+    if (travelled < 0) travelled += 360;
+    if (travelled >= WEDGE) {
+      const m1 = (wedgeStart + WEDGE) % 360;
+      wedges.push(sector(e0, wedgeStart, m1));
+      if (wedges.length > 9) wedges.shift();
+      wedgeStart = m1;
+    }
+    nuS.set(nuFromM(meanDeg, e0));
+  }
+
+  eS.on(() => { stop(); wedges = []; wedgeStart = meanDeg = MFromNu(nuS.get(), eS.get()); draw(); });
+  nuS.on(() => { stop(); wedges = []; meanDeg = wedgeStart = MFromNu(nuS.get(), eS.get()); draw(); });
   const play = document.createElement("div");
   play.className = "playrow";
   play.innerHTML = `<button class="pbtn primary" data-m="run">Sweep equal times</button>`;
   el.appendChild(play);
+  el.appendChild(cap);
   play.addEventListener("click", e => {
     if (!e.target.dataset.m) return;
-    if (playing) { playing = false; clearInterval(timer); e.target.classList.remove("on"); return; }
-    playing = true; e.target.classList.add("on"); swept = [];
+    if (playing) { stop(); return; }
+    playing = true;
+    e.target.classList.add("on");
+    wedges = [];
+    wedgeStart = meanDeg;
     timer = setInterval(() => {
-      if (!alive(el)) { clearInterval(timer); return; }
-      /* equal-area: advance mean anomaly, convert to true */
-      const e0 = eS.get();
-      let M = ast.rad(nuS.get()); /* treat slider as mean for animation */
-      M = (M + 0.04) % ast.TAU;
-      const E = ast.kepler(ast.deg(M), e0);
-      const nu = ast.atan2d(Math.sqrt(1 - e0 * e0) * Math.sin(E), Math.cos(E) - e0);
-      nuS.set(nu);
-      swept.push(nu);
-      if (swept.length > 80) swept.shift();
+      if (!alive(el)) { stop(); return; }
+      advanceMean();
       draw();
     }, 40);
   });
 
   function draw() {
     const e0 = eS.get(), nu = nuS.get();
-    const a = 180, b = a * Math.sqrt(1 - e0 * e0), c = a * e0;
+    const a = 180, b = a * Math.sqrt(Math.max(0, 1 - e0 * e0)), c = a * e0;
     const cx = w / 2, cy = h / 2;
+    const sunX = cx - c, sunY = cy;
     ctx.fillStyle = panel2(); ctx.fillRect(0, 0, w, h);
+    /* the circle the ellipse is compressed from — they part as e grows */
+    ctx.beginPath(); ctx.arc(cx, cy, a, 0, ast.TAU);
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = muted(); ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = muted();
+    ctx.font = "11px ui-sans-serif, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("circle", cx, cy - a - 6);
+    ctx.textAlign = "left";
     ctx.beginPath();
     for (let i = 0; i <= 180; i++) {
       const t = i / 180 * ast.TAU;
       const x = cx + a * Math.cos(t), y = cy - b * Math.sin(t);
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
-    ctx.strokeStyle = eqCol(); ctx.lineWidth = 1.6; ctx.stroke();
-    /* foci */
-    [[-c, "S, the sun"], [c, "empty focus"]].forEach(([fx, lab], i) => {
-      ctx.fillStyle = i === 0 ? gold() : muted();
-      ctx.beginPath(); ctx.arc(cx + fx, cy, 5, 0, ast.TAU); ctx.fill();
-      ctx.fillStyle = muted();
-      ctx.font = "11px ui-sans-serif, sans-serif";
-      ctx.fillText(lab, cx + fx + 8, cy - 8);
+    ctx.strokeStyle = eqCol(); ctx.lineWidth = 1.8; ctx.stroke();
+    /* equal-time sectors, filled from the sun */
+    const shown = wedges;
+    shown.forEach((wg, i) => {
+      ctx.beginPath();
+      ctx.moveTo(sunX, sunY);
+      wg.pts.forEach(p => ctx.lineTo(sunX + p[0] * a, sunY - p[1] * a));
+      ctx.closePath();
+      ctx.fillStyle = i % 2 ? "rgba(126,168,224,0.38)" : "rgba(212,160,74,0.34)";
+      ctx.fill();
+      ctx.strokeStyle = i % 2 ? "rgba(126,168,224,0.95)" : "rgba(212,160,74,0.9)";
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
     });
+    ctx.fillStyle = gold();
+    ctx.beginPath(); ctx.arc(sunX, sunY, 5, 0, ast.TAU); ctx.fill();
+    ctx.fillStyle = muted();
+    ctx.beginPath(); ctx.arc(cx + c, cy, 5, 0, ast.TAU); ctx.fill();
+    ctx.font = "11px ui-sans-serif, sans-serif";
+    ctx.fillStyle = muted();
+    ctx.textAlign = "center";
+    ctx.fillText("sun", sunX, Math.min(h - 8, sunY + 18));
+    ctx.textAlign = "left";
+    ctx.fillText("empty focus", cx + c + 8, cy + 4);
     const r = a * (1 - e0 * e0) / (1 + e0 * ast.cosd(nu));
-    const px = cx - c + r * ast.cosd(nu);
-    const py = cy - r * ast.sind(nu);
-    /* radii to both foci */
+    const px = sunX - r * ast.cosd(nu);
+    const py = sunY - r * ast.sind(nu);
+    const dSun = Math.hypot(px - sunX, py - sunY);
+    const dEmpty = Math.hypot(px - (cx + c), py - cy);
     ctx.setLineDash([3, 3]);
     ctx.strokeStyle = gold();
-    ctx.beginPath(); ctx.moveTo(cx - c, cy); ctx.lineTo(px, py); ctx.lineTo(cx + c, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sunX, sunY); ctx.lineTo(px, py); ctx.lineTo(cx + c, cy); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = ember();
     ctx.beginPath(); ctx.arc(px, py, 6, 0, ast.TAU); ctx.fill();
-    /* area sector from perihelion */
-    ctx.fillStyle = "rgba(212,160,74,0.18)";
-    ctx.beginPath(); ctx.moveTo(cx - c, cy);
-    for (let t = 0; t <= nu; t += 2) {
-      const rr = a * (1 - e0 * e0) / (1 + e0 * ast.cosd(t));
-      ctx.lineTo(cx - c + rr * ast.cosd(t), cy - rr * ast.sind(t));
+    if (!shown.length) {
+      ctx.fillStyle = "rgba(212,160,74,0.16)";
+      ctx.beginPath(); ctx.moveTo(sunX, sunY);
+      const span = nu <= 0.5 ? 360 : nu;
+      for (let t = 0; t <= span; t += 2) {
+        const rr = a * (1 - e0 * e0) / (1 + e0 * ast.cosd(t));
+        ctx.lineTo(sunX - rr * ast.cosd(t), sunY - rr * ast.sind(t));
+      }
+      ctx.closePath(); ctx.fill();
     }
-    ctx.closePath(); ctx.fill();
-    const peri = a * (1 - e0), aph = a * (1 + e0);
-    readout.textContent = `r = ${r.toFixed(1)} · perihelion ${peri.toFixed(1)} · aphelion ${aph.toFixed(1)} · PF + P F′ = 2a`;
+    const flat = (1 - b / a) * 100;
+    const sum = (dSun + dEmpty) / a;
+    readout.textContent = `departs from the circle by ${flat.toFixed(1)}% of a`;
+    const stringLine = `Distances to the foci: ${(dSun / a).toFixed(3)} + ${(dEmpty / a).toFixed(3)} = ${sum.toFixed(3)} = 2a.`;
+    if (shown.length >= 2) {
+      let lo = shown[0], hi = shown[0];
+      shown.forEach(wg => { if (wg.arc < lo.arc) lo = wg; if (wg.arc > hi.arc) hi = wg; });
+      const agree = Math.abs(lo.area - hi.area) / Math.max(lo.area, 1e-9) < 0.03;
+      cap.textContent = stringLine + ` Equal times: widest arc ${hi.arc.toFixed(1)}°, narrowest ${lo.arc.toFixed(1)}°. Their areas are ${hi.area.toFixed(3)} and ${lo.area.toFixed(3)}`
+        + (agree ? ", the same." : ", which do not agree.");
+    } else if (e0 < 0.12) {
+      cap.textContent = stringLine + " At this eccentricity the dashed circle and the ellipse lie on each other. Raise it until the oval is plain, then bring it back.";
+    } else {
+      cap.textContent = stringLine + " The dashed curve is the circle of radius a. Sweep equal times: the sectors have one area and unequal arcs.";
+    }
   }
-  el._astroState = function () { return { e: eS.get(), nu: nuS.get() }; };
+  el._astroState = function () { return { e: eS.get(), nu: nuS.get(), areas: wedges.map(w => ({ area: w.area, arc: w.arc })) }; };
+  el._astroTick = function (n) { for (let i = 0; i < n; i++) advanceMean(); draw(); };
   draw();
 }
 
@@ -1180,67 +1381,196 @@ function mountMenelaos(el) {
 
 /* ---- Three world-systems ------------------------------------------- */
 function mountWorlds(el) {
-  const readout = head(el, "Three constructions of the same appearances", "Ptolemy · Copernicus · Tycho");
-  const fig = canvasEl(el, 720, 280, "fig");
+  const readout = head(el, "Three constructions of the same appearances", "one elongation");
+  const fig = canvasEl(el, 720, 340, "fig");
   const { ctx, w, h } = fig;
-  const tS = sliderRow(el, "Time", 0, 360, 0.5, 20, v => v.toFixed(0) + "°");
-  tS.on(draw);
+  const tS = sliderRow(el, "Sun’s year-angle", 0, 360, 0.5, 40, v => v.toFixed(0) + "°");
+  const cap = document.createElement("p");
+  cap.className = "figcap";
+  let playing = false, timer = 0;
+  const play = document.createElement("div");
+  play.className = "playrow";
+  play.innerHTML = `<button class="pbtn primary" data-m="run">Run the year</button>`;
+  el.appendChild(play);
+  el.appendChild(cap);
+  play.addEventListener("click", e => {
+    if (!e.target.dataset.m) return;
+    if (playing) { playing = false; clearInterval(timer); e.target.classList.remove("on"); return; }
+    playing = true; e.target.classList.add("on");
+    timer = setInterval(() => {
+      if (!alive(el)) { clearInterval(timer); return; }
+      tS.set((tS.get() + 1.2) % 360);
+      draw();
+    }, 40);
+  });
+  tS.on(() => { draw(); });
   const vis = toggleRow(el, [
     { id: "p", label: "Ptolemy", on: true },
     { id: "c", label: "Copernicus", on: true },
     { id: "t", label: "Tycho", on: true }
   ], draw);
+
+  /* Outer planet, simple equivalence. a = earth's orbit, A = Mars's.
+     Sun direction u(θ). Mars's heliocentric direction u(φ), φ = 0.5317 θ.
+     Geocentric Mars = A u(φ) + a u(θ) in all three. */
+  const a = 1, A = 1.524, RATE = 365.25 / 687;
+  const sc = 42, oy = 168;
+  function u(deg) { return [ast.cosd(deg), ast.sind(deg)]; }
+  function add(p, q) { return [p[0] + q[0], p[1] + q[1]]; }
+  function mul(p, s) { return [p[0] * s, p[1] * s]; }
+  function bodies(theta) {
+    const th = theta, ph = theta * RATE;
+    const sun = mul(u(th), a);
+    const mars = add(mul(u(ph), A), sun);
+    return { sun, mars, ph, th };
+  }
+  function elong(theta) {
+    const b = bodies(theta);
+    return Math.abs(ast.wrap180(ast.atan2d(b.mars[1], b.mars[0]) - ast.atan2d(b.sun[1], b.sun[0])));
+  }
+  function lon(theta) {
+    const b = bodies(theta);
+    return ast.atan2d(b.mars[1], b.mars[0]);
+  }
+
   function draw() {
     const t = tS.get();
+    const b = bodies(t);
+    const elon = elong(t);
+    const earthC = mul(u(b.th), -a);
+    const marsH = mul(u(b.ph), A);
+    const elonC = Math.abs(ast.wrap180(
+      ast.atan2d(marsH[1] - earthC[1], marsH[0] - earthC[0]) - ast.atan2d(-earthC[1], -earthC[0])
+    ));
+    const lambda = lon(t);
+    const dLam = ast.wrap180(lon(t + 1) - lambda);
+    const motion = Math.abs(dLam) < 0.04 ? "standing" : dLam > 0 ? "direct" : "retrograde";
     ctx.fillStyle = panel2(); ctx.fillRect(0, 0, w, h);
     const panels = [
-      { id: "p", x: 120, title: "Ptolemy", draw: drawP },
-      { id: "c", x: 360, title: "Copernicus", draw: drawC },
-      { id: "t", x: 600, title: "Tycho", draw: drawT }
+      [120, "Ptolemy", "p"],
+      [360, "Copernicus", "c"],
+      [600, "Tycho", "t"]
     ];
-    panels.forEach(p => {
+    panels.forEach(([ox, title, id]) => {
       ctx.fillStyle = muted();
       ctx.font = "12px ui-sans-serif, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(p.title, p.x, 22);
-      if (vis[p.id] !== false) p.draw(p.x, t);
+      ctx.fillText(title, ox, 22);
+      ctx.fillText(elon.toFixed(1) + "°", ox, h - 16);
+      if (vis[id] === false) return;
+      if (id === "p") drawP(ox, b);
+      else if (id === "c") drawC(ox, b);
+      else drawT(ox, b);
     });
-    readout.textContent = "the same elongation of Mars, three hypotheses";
+    const agree = Math.abs(elon - elonC) < 0.05;
+    readout.textContent = agree
+      ? `elongation ${elon.toFixed(1)}° · Mars longitude ${lambda.toFixed(1)}° · ${motion}`
+      : `the three elongations disagree (${elon.toFixed(2)}° and ${elonC.toFixed(2)}°)`;
+    cap.textContent = "Pale is the sun, blue the earth, gold Mars. The elongation under each figure is the same number. Run the year: retrograde, when it comes, comes in all three.";
+    el._astroWorlds = { elong: elon, elongC: elonC, lon: lambda, motion, agree };
   }
-  function planet(x, y, col) {
-    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 5, 0, ast.TAU); ctx.fill();
+  function xy(ox, v) { return [ox + v[0] * sc, oy - v[1] * sc]; }
+  function disk(x, y, col, r) {
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r || 5, 0, ast.TAU); ctx.fill();
   }
-  function orbit(x, y, r, col) {
-    ctx.beginPath(); ctx.arc(x, y, r, 0, ast.TAU);
-    ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.stroke(); ctx.globalAlpha = 1;
+  function ring(x, y, rad, col) {
+    ctx.beginPath(); ctx.arc(x, y, rad, 0, ast.TAU);
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.2; ctx.stroke(); ctx.globalAlpha = 1;
   }
-  function drawP(ox, t) {
-    const R = 70, r = 28;
-    orbit(ox, 150, R, eqCol());
-    const cx = ox + R * ast.cosd(t), cy = 150 - R * ast.sind(t);
-    orbit(cx, cy, r, eclCol());
-    const px = cx + r * ast.cosd(t * 2.1), py = cy - r * ast.sind(t * 2.1);
-    planet(ox, 150, ember());
-    planet(px, py, gold());
+  function sight(ox, from, to) {
+    const a = xy(ox, from), b = xy(ox, to);
+    ctx.setLineDash([2, 3]); ctx.strokeStyle = muted(); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    ctx.setLineDash([]);
   }
-  function drawC(ox, t) {
-    orbit(ox, 150, 36, gold());
-    orbit(ox, 150, 70, eqCol());
-    const ex = ox + 36 * ast.cosd(t), ey = 150 - 36 * ast.sind(t);
-    const px = ox + 70 * ast.cosd(t * 0.53), py = 150 - 70 * ast.sind(t * 0.53);
-    planet(ox, 150, gold()); /* sun */
-    planet(ex, ey, ember());
-    planet(px, py, sage());
+  function drawP(ox, b) {
+    const earth = [0, 0];
+    const C = mul(u(b.ph), A);
+    ring(ox, oy, A * sc, eqCol());
+    ring(ox, oy, a * sc, "#ffe9a0");
+    const cxy = xy(ox, C);
+    ring(cxy[0], cxy[1], a * sc, eclCol());
+    sight(ox, earth, b.sun);
+    sight(ox, C, b.mars);
+    sight(ox, earth, b.mars);
+    disk(...xy(ox, earth), ember(), 6);
+    disk(...xy(ox, b.sun), "#ffe9a0", 5);
+    disk(...xy(ox, b.mars), gold(), 5);
+    tag(ox, earth, "Earth"); tag(ox, b.sun, "Sun"); tag(ox, b.mars, "Mars");
   }
-  function drawT(ox, t) {
-    orbit(ox, 150, 36, gold());
-    const sx = ox + 36 * ast.cosd(t), sy = 150 - 36 * ast.sind(t);
-    orbit(sx, sy, 40, eqCol());
-    const px = sx + 40 * ast.cosd(t * 0.53), py = sy - 40 * ast.sind(t * 0.53);
-    planet(ox, 150, ember());
-    planet(sx, sy, gold());
-    planet(px, py, sage());
+  function drawC(ox, b) {
+    const sun = [0, 0];
+    const earth = mul(u(b.th), -a);
+    const marsH = mul(u(b.ph), A);
+    ring(ox, oy, a * sc, ember());
+    ring(ox, oy, A * sc, eqCol());
+    sight(ox, earth, sun);
+    sight(ox, earth, marsH);
+    disk(...xy(ox, sun), "#ffe9a0", 7);
+    disk(...xy(ox, earth), ember(), 5);
+    disk(...xy(ox, marsH), gold(), 5);
+    tag(ox, sun, "Sun"); tag(ox, earth, "Earth"); tag(ox, marsH, "Mars");
   }
+  function drawT(ox, b) {
+    const earth = [0, 0];
+    ring(ox, oy, a * sc, "#ffe9a0");
+    const sxy = xy(ox, b.sun);
+    ring(sxy[0], sxy[1], A * sc, eqCol());
+    sight(ox, earth, b.sun);
+    sight(ox, earth, b.mars);
+    disk(...xy(ox, earth), ember(), 6);
+    disk(...xy(ox, b.sun), "#ffe9a0", 5);
+    disk(...xy(ox, b.mars), gold(), 5);
+    tag(ox, earth, "Earth"); tag(ox, b.sun, "Sun"); tag(ox, b.mars, "Mars");
+  }
+  function tag(ox, v, text) {
+    const p = xy(ox, v);
+    ctx.fillStyle = muted();
+    ctx.font = "10px ui-sans-serif, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(text, p[0] + 7, p[1] - 6);
+  }
+  draw();
+}
+
+/* ---- Harmonic law -------------------------------------------------- */
+function mountHarmony(el) {
+  const readout = head(el, "The harmonic law", "P² against a³");
+  const planets = [
+    ["Mercury", 0.241, 0.387],
+    ["Venus", 0.615, 0.723],
+    ["Earth", 1, 1],
+    ["Mars", 1.881, 1.524],
+    ["Jupiter", 11.86, 5.203],
+    ["Saturn", 29.46, 9.537]
+  ];
+  const pS = sliderRow(el, "Period (years)", 0.2, 40, 0.01, 29.46, v => v.toFixed(2));
+  const aS = sliderRow(el, "Mean distance (AU)", 0.3, 12, 0.001, 9.537, v => v.toFixed(3));
+  const row = document.createElement("div");
+  row.className = "playrow";
+  planets.forEach(([name, P, a]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pbtn";
+    b.textContent = name;
+    b.addEventListener("click", () => { pS.set(P); aS.set(a); draw(); });
+    row.appendChild(b);
+  });
+  el.appendChild(row);
+  const cap = document.createElement("p");
+  cap.className = "figcap";
+  el.appendChild(cap);
+  function draw() {
+    const P = pS.get(), a = aS.get();
+    const p2 = P * P, a3 = a * a * a;
+    const ratio = p2 / a3;
+    const near = Math.abs(ratio - 1) < 0.015;
+    cap.classList.toggle("ok", near);
+    cap.textContent = `P² = ${p2.toFixed(2)} · a³ = ${a3.toFixed(2)} · P²/a³ = ${ratio.toFixed(3)}`
+      + (near ? " — the proportion holds" : " — the proportion does not hold");
+    readout.textContent = near ? "agrees" : "off";
+  }
+  pS.on(draw); aS.on(draw);
   draw();
 }
 

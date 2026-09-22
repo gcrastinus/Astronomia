@@ -29,7 +29,8 @@ const state = {
   journal: [],
   lat: 40.7,
   lon: -new Date().getTimezoneOffset() / 4,
-  guided: false
+  guided: false,
+  speakRate: 1
 };
 
 const chapterOf = {};
@@ -117,6 +118,7 @@ function load() {
     if (typeof raw.lat === "number" && isFinite(raw.lat)) state.lat = raw.lat;
     if (typeof raw.lon === "number" && isFinite(raw.lon)) state.lon = raw.lon;
     if (typeof raw.guided === "boolean") state.guided = raw.guided;
+    if (typeof raw.speakRate === "number" && isFinite(raw.speakRate)) state.speakRate = raw.speakRate;
   } catch (_) { /* ignore */ }
   document.documentElement.dataset.theme = state.theme;
   document.documentElement.dataset.guide = state.guided ? "on" : "off";
@@ -128,7 +130,8 @@ function save() {
       theme: state.theme, id: state.id, done: state.done,
       answers: state.answers, drills: state.drills,
       contemplations: state.contemplations, journal: state.journal,
-      lat: state.lat, lon: state.lon, guided: state.guided
+      lat: state.lat, lon: state.lon, guided: state.guided,
+      speakRate: state.speakRate
     }));
   } catch (_) { /* file:// or private mode */ }
 }
@@ -397,7 +400,7 @@ AstroArs.stopSpeak = stopSpeak;
 function skipSpeakEl(el) {
   if (!el || el.nodeType !== 1) return false;
   if (el.hidden || el.getAttribute("aria-hidden") === "true") return true;
-  if (el.matches(".pager, .invite, .kicker, .sources, .playrow, .dots, .drill-next, .drill-input, .snaps, .tbtns, .ctrl, .toggles, .legend, .sky-read, svg, canvas, .j-form")) return true;
+  if (el.matches(".pager, .invite, .kicker, .sources, .playrow, .dots, .drill-next, .drill-input, .snaps, .tbtns, .ctrl, .toggles, .legend, .sky-read, svg, canvas, .j-form, .speak-rate, .speak-unit")) return true;
   if (el.matches("button.pbtn, button.tbtn, button.key, input, select, textarea")) return true;
   if (el.matches(".explain") && !el.classList.contains("show")) return true;
   if (el.matches(".whead")) {
@@ -509,7 +512,7 @@ function startSpeak() {
     if (gen !== speakGen) return;
     if (i >= chunks.length) { setSpeaking(false); return; }
     const u = new SpeechSynthesisUtterance(chunks[i]);
-    u.rate = 0.94;
+    u.rate = state.speakRate || 1;
     u.lang = "en-US";
     if (voice) u.voice = voice;
     u.onend = () => { i += 1; next(); };
@@ -523,6 +526,59 @@ function startSpeak() {
 function toggleSpeak() {
   if (speaking) stopSpeak();
   else startSpeak();
+}
+
+function bindSpeakRate() {
+  const rateEl = $("#speak-rate");
+  if (!rateEl) return;
+  const RATES = [1, 1.5, 2, 2.5, 3];
+  if (RATES.indexOf(state.speakRate) < 0) state.speakRate = 1;
+  const rateBtn = rateEl.querySelector(".speak-rate-btn");
+  const rateMenu = rateEl.querySelector(".speak-rate-menu");
+  function rateLabel(r) { return String(r) + "×"; }
+  function applyRateUI(r) {
+    if (RATES.indexOf(r) < 0) r = 1;
+    state.speakRate = r;
+    if (rateBtn) rateBtn.textContent = rateLabel(r);
+    if (rateMenu) {
+      rateMenu.querySelectorAll("[data-rate]").forEach(li => {
+        li.setAttribute("aria-selected", parseFloat(li.getAttribute("data-rate")) === r ? "true" : "false");
+      });
+    }
+  }
+  applyRateUI(state.speakRate);
+  function closeRateMenu() {
+    rateEl.classList.remove("open");
+    if (rateBtn) rateBtn.setAttribute("aria-expanded", "false");
+    if (rateMenu) rateMenu.hidden = true;
+  }
+  function openRateMenu() {
+    rateEl.classList.add("open");
+    if (rateBtn) rateBtn.setAttribute("aria-expanded", "true");
+    if (rateMenu) rateMenu.hidden = false;
+  }
+  if (rateBtn) {
+    rateBtn.addEventListener("click", ev => {
+      ev.stopPropagation();
+      if (rateMenu && rateMenu.hidden) openRateMenu();
+      else closeRateMenu();
+    });
+  }
+  if (rateMenu) {
+    rateMenu.addEventListener("click", ev => {
+      const li = ev.target.closest("[data-rate]");
+      if (!li) return;
+      applyRateUI(parseFloat(li.getAttribute("data-rate")) || 1);
+      save();
+      closeRateMenu();
+    });
+  }
+  document.addEventListener("click", ev => {
+    if (!rateEl.contains(ev.target)) closeRateMenu();
+  });
+  document.addEventListener("keydown", ev => {
+    if (ev.key === "Escape") closeRateMenu();
+  });
 }
 
 function toggleTheme() {
@@ -571,6 +627,7 @@ function init() {
   if (hash && byId[hash]) state.id = hash;
   $("#b-theme").addEventListener("click", toggleTheme);
   $("#b-speak").addEventListener("click", toggleSpeak);
+  bindSpeakRate();
   $("#b-lab").addEventListener("click", () => go("lab"));
   $("#b-jour").addEventListener("click", () => go("journal"));
   $("#b-guide")?.addEventListener("change", onGuideChange);

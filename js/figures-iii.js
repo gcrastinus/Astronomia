@@ -274,6 +274,21 @@ FIGS["menelaos-plane"] = {
     b.seg(D, F, { id: "seg:DF" });
     b.seg(F, E, { id: "seg:FE", dash: "5 4" });
     b.seg(D, E, { id: "seg:DE", dash: "5 4" });
+    function foot(P) {
+      const ab = sub(F, D);
+      const t = dot(sub(P, D), ab) / (dot(ab, ab) || 1);
+      return add(D, mul(ab, t));
+    }
+    const Ha = b.at("Ha", foot(A), { step: 2, label: "", dir: [0.4, 0.6] });
+    const Hb = b.at("Hb", foot(B), { step: 2, label: "", dir: [-0.5, -0.4] });
+    const Hc = b.at("Hc", foot(C), { step: 2, label: "", dir: [0.5, -0.4] });
+    b.line(D, F, { id: "line:DF", step: 2, dash: "2 4" });
+    b.seg(A, Ha, { id: "seg:hA", step: 2, dash: "3 3" });
+    b.seg(B, Hb, { id: "seg:hB", step: 2, dash: "3 3" });
+    b.seg(C, Hc, { id: "seg:hC", step: 2, dash: "3 3" });
+    b.ang(A, Ha, F, { id: "ang:Ha", step: 2, square: true, r: 10 });
+    b.ang(B, Hb, D, { id: "ang:Hb", step: 2, square: true, r: 10 });
+    b.ang(C, Hc, F, { id: "ang:Hc", step: 2, square: true, r: 10 });
   },
   steps: [
     {
@@ -284,17 +299,13 @@ FIGS["menelaos-plane"] = {
       ]
     },
     {
-      text: "Drop perpendiculars from A, B, C to the transversal, or equivalently compare similar triangles formed by those perpendiculars. The three ratios of segments are then equal in pairs.",
-      hlBeats: [
-        { hl: ["seg:AB", "pt:D"] },
-        { hl: ["seg:BC", "pt:E"] },
-        { hl: ["seg:CA", "pt:F"] }
-      ]
+      text: "Drop perpendiculars from A, B, and C to the transversal, extended where the foot falls outside the segment. Each side is cut in the ratio of the distances of its endpoints from that line: AD/DB = hA/hB, BE/EC = hB/hC, CF/FA = hC/hA.",
+      hlIds: ["line:DF", "seg:hA", "seg:hB", "seg:hC", "pt:Ha", "pt:Hb", "pt:Hc", "ang:Ha", "ang:Hb", "ang:Hc"]
     },
     {
-      text: "The product AD/DB · BE/EC · CF/FA telescopes to 1. Drag D or F: the product stays 1.",
+      text: "Multiply the three ratios. The distances cancel, and AD/DB · BE/EC · CF/FA = 1. Drag D or F: the product stays 1.",
       hlBeats: [
-        { hl: ["pt:D", "pt:E", "pt:F", "seg:DF"] }
+        { hl: ["pt:D", "pt:E", "pt:F", "seg:DF", "seg:hA", "seg:hB", "seg:hC"] }
       ]
     },
     {

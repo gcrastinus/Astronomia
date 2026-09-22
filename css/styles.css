@@ -197,8 +197,89 @@ header h1 small {
   background: color-mix(in srgb, var(--gold) 28%, var(--panel2));
   border-color: var(--gold);
 }
+.speak-unit {
+  display: inline-flex;
+  align-items: stretch;
+  position: relative;
+  flex-shrink: 0;
+  background: var(--panel2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+.speak-unit:hover { border-color: var(--gold); }
+.speak-unit #b-speak {
+  border: none;
+  background: transparent;
+  border-radius: 8px 0 0 8px;
+  box-shadow: none;
+}
+.speak-unit #b-speak:hover { border: none; }
 #b-speak[aria-pressed="true"] {
   color: var(--ember);
+}
+.speak-rate {
+  display: flex;
+}
+.speak-rate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.8em;
+  padding: 6px 9px;
+  border: none;
+  border-left: 1px solid var(--rule);
+  background: transparent;
+  color: inherit;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.speak-rate-btn::after {
+  content: "▾";
+  margin-left: 4px;
+  font-size: 9px;
+  opacity: 0.85;
+}
+.speak-rate-btn:hover,
+.speak-rate.open .speak-rate-btn {
+  background: color-mix(in srgb, var(--gold) 14%, var(--panel2));
+}
+.speak-rate-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  min-width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+.speak-rate-menu[hidden] { display: none; }
+.speak-rate-menu li {
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.speak-rate-menu li:hover,
+.speak-rate-menu li:focus {
+  background: var(--panel2);
+  color: var(--gold);
+}
+.speak-rate-menu li[aria-selected="true"] {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 18%, var(--panel2));
 }
 #b-nav { display: none; flex-shrink: 0; }
 nav {
@@ -862,15 +943,16 @@ code {
   .era b { padding-top: 8px; }
   .gps-row { grid-template-columns: 1fr auto; }
   .gps-row .gstep { display: none; }
-  header { gap: 6px; padding-left: 10px; padding-right: 10px; }
+  header { gap: 6px; padding-left: 10px; padding-right: 10px; flex-wrap: wrap; row-gap: 6px; }
   header h1 {
     font-size: 16px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex: 1 1 calc(100% - 52px);
+    min-width: 0;
   }
   .guide { display: none; }
-  #b-jour { display: none; }
 }
 
 /* ---- Astronomia: sky, models, journal, tiers ---- */
@@ -1054,10 +1136,12 @@ canvas.fig { background: var(--panel2); cursor: default; }
 @media (max-width: 640px) { .twofig { grid-template-columns: 1fr; } }
 .figcap {
   font-family: var(--sans);
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--muted);
   margin: 6px 0 0;
+  line-height: 1.45;
 }
+.figcap.ok { color: var(--good); }
 .fit-read {
   font-family: var(--sans);
   font-size: 12.5px;

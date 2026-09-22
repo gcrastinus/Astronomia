@@ -341,7 +341,7 @@ const KEPLER_WORK = [
     { reveal: () => "perihelion, true anomaly 0°" }
   ),
   () => work(
-    "Set the eccentricity to Mars’s. The greatest distance of its orbit from a circle is about the width you can see here — very nearly circular, as the table in the aftermath says.",
+    "The dashed curve is a circle. Bring the eccentricity down to Mars’s, about 0.093, and watch the ellipse fall in with the circle.",
     { kind: "ellipse", attrs: { e: "0.25", nu: "40", title: "The circle destroyed" } },
     st => Math.abs(st.e - 0.093) <= 0.02,
     "Mars’s eccentricity is about 0.093. The orbit looks circular to the eye; Tycho’s minutes of arc do not. That is why the circle survived so long, and why it had to go.",

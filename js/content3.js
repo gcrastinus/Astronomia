@@ -8,9 +8,10 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
   html: `
 <p>Johannes Kepler, 1571–1630. He had Tycho’s observations of Mars — the best longitudes yet taken — and a conviction that Copernicus was right about the earth’s motion, and a further conviction that the sun was not merely at rest but was a <em>cause</em>. The <em>Astronomia nova</em> (1609) is the book of that task: to find the path of Mars, and the law of its speed, from Tycho’s numbers, without sparing a false step.</p>
 <p>This course reads Kepler as a man discovering, not as a man who was right. He gets a construction wrong, and the book says so. He thinks physically, and sometimes the physics is a guess (magnetism). He destroys the circle because the numbers destroy it, not because ellipses are beautiful. That habit — marking the status of each claim — is the reason the <em>Astronomia nova</em> is usable by someone who will go on to the primary text.</p>
-<blockquote class="note">
-<p>He is constructing a new astronomy, not of circles, but of the causes of the motions; not of the appearances, but of the body of the world. Whether that is still the liberal art, or already physics, is a question Chapter VIII will take up. Here, follow the geometry.</p>
-</blockquote>
+<div class="remark">
+  <h4>A question deferred</h4>
+  <p>He is constructing a new astronomy, of the causes of the motions and of the body of the world, not only of circles and of appearances. Whether that is still the liberal art, or already physics, <span class="xref" data-ch="VIII"></span> will take up. Here, follow the geometry.</p>
+</div>
 `,
   sources: "Kepler, Astronomia nova, introduction; Donahue’s translation and selections."
 },
@@ -35,9 +36,8 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
 <p>Kepler can find the sun–Mars distances at various points of the orbit, by triangulation: the earth’s orbit used as a base, Tycho’s oppositions and other observations as the angles. The distances do not fit a circle, whether centred on the sun or eccentric.</p>
 <p>He tries an oval. He tries an epicycle that would fatten the circle into a kind of ellipse-before-the-name. He gets the construction rule <em>wrong</em>: a chapter of the <em>Astronomia nova</em> is the error, left in the book. Then he finds the right rule. The distances match an ellipse with the sun at one focus.</p>
 <p>That is not a guess at a pretty curve. It is the remaining oval after the circle has been measured and has failed. The focus is not yet so named in the physical sense Kepler needs; the word is Apollonius’s. The empty focus will turn out to sit where the equant sat. Ptolemy’s displaced point of uniform motion lies near where the second focus would later be found.</p>
-<div class="widget" data-kind="ellipse" data-title="The circle destroyed — set the eccentricity of Mars (~0.09)"></div>
-<p>Set eccentricity to 0.09, about Mars. The circle and the ellipse are nearly the same to the eye. They are not the same to Tycho’s 2′. That is why the circle survived so long, and why it had to go.</p>
-<p class="qed">Q.E.D. — the orbit of Mars is not a circle</p>
+<div class="widget" data-kind="ellipse" data-e="0.09" data-title="The circle destroyed — Mars is about 0.09"></div>
+<p>The dashed curve is a circle of radius <em>a</em>, centred with the ellipse. At Mars’s eccentricity, about 0.09, the two lie on each other. Raise the eccentricity until the oval is plain, then bring it back. What killed the circle is below the eye on this page, and within the reach of a quadrant. They are not the same to Tycho’s 2′.</p>
 `,
   sources: "Kepler, Astronomia nova 44–59; Apollonius, Conics."
 },
@@ -71,7 +71,7 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
 <p>The planet does not move equal angles in equal times about the sun. It does sweep equal <em>areas</em> in equal times. That is the second law (the first, in the later numbering, being the ellipse; in the <em>Astronomia nova</em> the area law is found first, as a way of computing times, before the ellipse is confirmed).</p>
 <p>Kepler reached it from the physical guess that speed is inverse to distance, plus an approximation: the area of a sector as a sum of distances. The approximation is not exact for the guess, but it is exact for the world. The law is truer than the argument that first found it. That is not rare in this art, and it is to be marked, not hidden.</p>
 <div class="widget" data-kind="ellipse" data-title="Equal areas in equal times — run the sweep"></div>
-<p>Run the sweep. Near perihelion the planet covers more arc; the triangle is short and fat. Near aphelion, long and thin. The areas match. The empty focus is not an equant: motion is not uniform about it. A short <em>reductio</em>, which belongs in the aftermath: if the second focus were an equant, the area law would fail. It does not. So the equant, as Ptolemy stated it, is not the second focus, though it is near.</p>
+<p>Run the sweep. Successive equal times fill the ellipse. The widest arc and the narrowest are reported with their areas: the areas agree, and the arcs do not. Near perihelion the sector is short and wide; near aphelion, long and thin. The empty focus is not an equant: motion is not uniform about it. A short <em>reductio</em>, which belongs in the aftermath: if the second focus were an equant, the area law would fail. It does not. So the equant, as Ptolemy stated it, is not the second focus, though it is near.</p>
 <p class="qed">Q.E.D. — equal areas, not equal angles</p>
 `,
   sources: "Kepler, Astronomia nova 32–40, 59."
@@ -96,6 +96,8 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
   </tbody>
 </table>
 <p class="figcap">P² / a³ is 1 when period is in years and distance in astronomical units. Mercury’s small departure is real; it is not needed for the law as Kepler stated it.</p>
+<div class="widget" data-kind="harmony"></div>
+<p>The table is the result. The figure computes one row. Take Saturn, as the text just did with rounded numbers, then nudge the distance and watch the proportion leave 1.</p>
 `,
   sources: "Kepler, Harmonice mundi V.3."
 },

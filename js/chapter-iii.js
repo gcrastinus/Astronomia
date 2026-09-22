@@ -245,7 +245,7 @@ A.mountChordTable = function mountChordTable(el) {
     <button type="button" class="pbtn" id="c-half">Half</button>
     <button type="button" class="pbtn" id="c-one">Bound 1°</button>
     <button type="button" class="pbtn" id="c-sine"><span class="status crutch">check against the sine</span></button>
-    <span class="sel" id="c-sel">Select one row, or two for a difference.</span>`;
+    <span class="sel" id="c-sel"></span>`;
   el.appendChild(ops);
   const tab = document.createElement("table");
   tab.className = "numtab";
@@ -279,8 +279,8 @@ A.mountChordTable = function mountChordTable(el) {
         paintTable();
         drawFig();
         ops.querySelector("#c-sel").textContent = picked.length
-          ? "Selected: " + picked.map(arcLabel).join(" and ")
-          : "Select one row, or two for a difference.";
+          ? "Selected: " + picked.map(arcLabel).join(" and ") + (picked.length === 2 ? ". Difference subtracts the smaller from the larger." : ". Half bisects this arc.")
+          : hint();
       });
       body.appendChild(tr);
     });
@@ -318,6 +318,16 @@ A.mountChordTable = function mountChordTable(el) {
       : "diameter 120 · built, not assumed";
   }
 
+  function hint() {
+    const has = a => !!known(a);
+    if (!has(12)) return "Next, as Ptolemy does: select 72° and 60°, then Difference. That is crd 12°.";
+    if (!has(6)) return "Next: select 12°, then Half.";
+    if (!has(3)) return "Next: select 6°, then Half.";
+    if (!has(1.5)) return "Next: select 3°, then Half.";
+    if (!has(0.75)) return "Next: select 1½°, then Half.";
+    if (!has(1)) return "Next: Bound 1°. It cannot be constructed. The button brackets it between 1½° and ¾° and takes the mean.";
+    return "The chain from Euclid down to 1° is in the table. The sine column is a check, not a step of the construction.";
+  }
   function say(msg) {
     ops.querySelector("#c-sel").textContent = msg;
     A.toast && A.toast(msg);
@@ -336,7 +346,7 @@ A.mountChordTable = function mountChordTable(el) {
     const cA = known(a).value, cB = known(b).value;
     add(d, diffChord(cA, cB), "crd " + arcLabel(d) + " = crd(" + arcLabel(a) + "−" + arcLabel(b) + ")");
     clearPick();
-    say("crd " + arcLabel(d) + " added. Select the next arcs.");
+    say("crd " + arcLabel(d) + " added. " + hint());
   });
   ops.querySelector("#c-half").addEventListener("click", () => {
     if (picked.length !== 1) { say("Pick one arc."); return; }
@@ -344,7 +354,7 @@ A.mountChordTable = function mountChordTable(el) {
     if (known(h)) { say("Already in the table."); return; }
     add(h, halfChord(known(a).value), "crd " + arcLabel(h) + " = half of crd " + arcLabel(a));
     clearPick();
-    say("crd " + arcLabel(h) + " added. Select the next arc.");
+    say("crd " + arcLabel(h) + " added. " + hint());
   });
   ops.querySelector("#c-one").addEventListener("click", () => {
     const a = known(1.5), b = known(0.75);
@@ -357,7 +367,7 @@ A.mountChordTable = function mountChordTable(el) {
       how: "cannot be constructed · between ⅔·crd 1½° = " + lo.toFixed(6) + " and 4/3·crd ¾° = " + hi.toFixed(6) + " — Ptolemy takes the mean"
     };
     clearPick();
-    say("crd 1° bounded and interpolated.");
+    say("crd 1° bounded and interpolated. " + hint());
   });
   ops.querySelector("#c-sine").addEventListener("click", ev => {
     showSine = !showSine;
@@ -367,6 +377,7 @@ A.mountChordTable = function mountChordTable(el) {
 
   paintTable();
   drawFig();
+  ops.querySelector("#c-sel").textContent = hint();
 };
 
 /* ---- Spherical Menelaos -------------------------------------------- */
@@ -415,10 +426,10 @@ A.mountMenelaosSphere = function mountMenelaosSphere(el) {
   el.appendChild(row);
 
   const steps = [
-    "Given: a spherical triangle in great circles. Drag the sphere; drag the sliders to move D and F.",
-    "A transversal great circle cuts AB at D, CA at F, and BC (produced if needed) at E.",
-    "The ratios are now chords of twice the arcs: crd(2 AD)/crd(2 DB) · crd(2 BE)/crd(2 EC) · crd(2 CF)/crd(2 FA).",
-    "Q.E.D. — the product is 1, as in the plane, with chords of the double arcs."
+    "Given: a spherical triangle in great circles. Drag the sphere. The sliders move D along AB and F along CA.",
+    "A transversal great circle cuts AB at D, CA at F, and BC at E.",
+    "The ratios are chords of twice the arcs: crd(2 AD)/crd(2 DB) · crd(2 BE)/crd(2 EC) · crd(2 CF)/crd(2 FA). That is the plane theorem, read on those chords.",
+    "Q.E.D. — the product is 1, by the plane theorem applied to the chords of the double arcs. Move D or F: it stays 1."
   ];
   let step = 0, yaw = 28, pitch = 18, tD = 0.34, tF = 0.48;
 
@@ -524,7 +535,10 @@ A.mountMenelaosSphere = function mountMenelaosSphere(el) {
     row.innerHTML = `<label>${lab}</label><input type="range" min="${min}" max="${max}" step="0.01" value="${val}"><span class="val"></span>`;
     sliders.appendChild(row);
     const inp = row.querySelector("input");
-    inp.addEventListener("input", () => on(+inp.value));
+    const valEl = row.querySelector(".val");
+    const show = () => { valEl.textContent = (+inp.value).toFixed(2); };
+    show();
+    inp.addEventListener("input", () => { show(); on(+inp.value); });
     return inp;
   }
   slider("D on AB", 0.12, 0.88, tD, v => { tD = v; draw(); });
