@@ -1219,3 +1219,14 @@ svg.geom {
 .chord-ops .sel { font-family: var(--sans); font-size: 12.5px; color: var(--muted); }
 .numtab tr.picked td { background: color-mix(in srgb, var(--gold) 16%, transparent); }
 .numtab .interp { color: var(--muted); font-style: italic; }
+
+
+.designer-credit{
+  text-align:center;
+  margin:28px auto 8px;
+  max-width:40rem;
+  font-size:0.95rem;
+  font-style:italic;
+  line-height:1.45;
+  color:var(--muted);
+}
