@@ -386,7 +386,7 @@ function setSpeaking(on) {
   b.setAttribute("aria-pressed", on ? "true" : "false");
   b.setAttribute("aria-label", on ? "Stop reading" : "Read this page");
   b.title = on ? "Stop reading (r)" : "Read this page (r)";
-  b.textContent = on ? "⏹" : "🔊";
+  b.textContent = on ? "❚❚" : "▶";
 }
 
 function stopSpeak() {
@@ -539,7 +539,7 @@ function bindSpeakRate() {
   function applyRateUI(r) {
     if (RATES.indexOf(r) < 0) r = 1;
     state.speakRate = r;
-    if (rateBtn) rateBtn.textContent = rateLabel(r);
+    /* caret stays ▾; rate shown only in menu */
     if (rateMenu) {
       rateMenu.querySelectorAll("[data-rate]").forEach(li => {
         li.setAttribute("aria-selected", parseFloat(li.getAttribute("data-rate")) === r ? "true" : "false");

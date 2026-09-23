@@ -224,25 +224,17 @@ header h1 small {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.8em;
-  padding: 6px 9px;
+  min-width: 1.6em;
+  padding: 6px 8px;
   border: none;
   border-left: 1px solid var(--rule);
   background: transparent;
   color: inherit;
-  font-family: var(--sans);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
+  font-size: 11px;
   border-radius: 0 8px 8px 0;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-}
-.speak-rate-btn::after {
-  content: "▾";
-  margin-left: 4px;
-  font-size: 9px;
-  opacity: 0.85;
 }
 .speak-rate-btn:hover,
 .speak-rate.open .speak-rate-btn {
@@ -256,7 +248,7 @@ header h1 small {
   margin: 0;
   padding: 6px;
   list-style: none;
-  min-width: 100%;
+  min-width: 4.5em;
   background: var(--panel);
   border: 1px solid var(--rule);
   border-radius: 8px;
