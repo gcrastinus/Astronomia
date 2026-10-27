@@ -56,13 +56,14 @@ html[data-theme="dark"] {
 html, body { margin: 0; height: 100%; }
 html {
   background: var(--bg2);
-  scrollbar-color: var(--gold-soft) var(--bg2);
-  scrollbar-width: thin;
+  scrollbar-color: var(--gold) var(--bg2);
+  scrollbar-width: auto;
 }
-::-webkit-scrollbar { width: 12px; height: 12px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar { width: 20px; height: 20px; }
+::-webkit-scrollbar-track { background: var(--bg2); border-left: 1px solid var(--gold-soft); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink); }
 ::-webkit-scrollbar-thumb {
-  background: var(--gold-soft);
+  background: var(--gold);
   border-radius: 8px;
   border: 3px solid var(--bg2);
 }
