@@ -38,7 +38,7 @@ AstroArs.LESSONS = [
   <p>This course teaches the mathematical skill of the art in full, and shows the doctrine of the whole faithfully enough to be believed and returned to — but the doctrine’s full demonstration lives in the books it points you toward: Ptolemy’s <em>Almagest</em>, Copernicus’s <em>De revolutionibus</em>, Kepler’s <em>Astronomia nova</em>.</p>
 </div>
 <p>Guided practice, if you turn it on, will bring the exercise blocks back on a spaced schedule. The contemplations are not scored. They are for returning to in a month, then a season, then a year.</p>
-<p class="designer-credit">These courses of study were designed by Timothy Kearns, PhD, built and maintained with the assistance of AI tools, and are continuously revised for clarity and precision.</p>
+<p class="designer-credit">Designed and directed by Timothy Kearns, Ph.D. AI tools were used for drafting some of the study sections and for building the interactive exercises and answer keys.</p>
 `
 },
 
