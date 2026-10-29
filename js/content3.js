@@ -294,7 +294,7 @@ AstroArs.LESSONS = (AstroArs.LESSONS || []).concat([
 {
   id: "ix-4",
   ch: "IX",
-  title: "The same stuff",
+  title: "Spectra and the composition of the heavens",
   html: `
 <p><span class="tier ii">Tier II</span></p>
 <p>Fraunhofer, 1814: dark lines in the solar spectrum, fixed, named. Kirchhoff and Bunsen, later: those lines are the signatures of elements known in the laboratory. In 1868, a line in the sun that was not then known on earth: helium, named for the sun, found on earth in 1895. The heavens are made of the same stuff. That is the observational answer to the old division between celestial and terrestrial matter — the same question the moon test had already pressed, now from a spectrum rather than a pendulum.</p>

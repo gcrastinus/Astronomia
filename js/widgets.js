@@ -2290,7 +2290,7 @@ function mountJournal(el) {
     const pts = valuedPoints(entries, t);
     if (pts.length < 3) {
       overlayBtn.hidden = true;
-      list.innerHTML = `<p class="figcap">Three measures make a figure. Keep going.</p>` + proseCards(entries, t);
+      list.innerHTML = `<p class="figcap">Three measures make a figure. Continue.</p>` + proseCards(entries, t);
       bindRemoves(list, entries);
       return;
     }
